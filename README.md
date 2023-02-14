@@ -3,11 +3,15 @@
 将 .env.example  文件修改为 .env
 
 #PROXYUSE =1 表示使用代理 ，0表示不适用代理
+
 PROXYUSE =  1
+
 PROXYURL =  http://localhost:10809  
 
 #币安密钥
-APIKEY= 
+
+APIKEY=
+ 
 SECRETKEY= 
 
 
