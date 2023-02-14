@@ -1,0 +1,8 @@
+node_modules
+electron-quick-start-win32-x64
+*.rar
+cmd.exe.lnk
+
+.env
+node_modules/*
+cmd.exe

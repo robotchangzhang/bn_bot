@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'self'; script-src * 'unsafe-inline'; style-src 'self' 'unsafe-inline'">
+  <link href="./styles.css" rel="stylesheet">
+  <title>币安合约快速操作助手</title>
+  <style>
+    .one,
+    .two {
+
+      width: 50%;
+
+      height: 100%;
+
+      border: 1px solid #ccc;
+
+      float: left;
+
+      box-sizing: border-box;
+
+    }
+  </style>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      height: 100%;
+    }
+
+    body {
+      padding: 10px 15px;
+      margin: 0;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+    }
+
+    button {
+      display: inline-block;
+      line-height: 1;
+      white-space: nowrap;
+      cursor: pointer;
+      background: #fff;
+      border: 1px solid #dcdfe6;
+      color: #606266;
+      -webkit-appearance: none;
+      text-align: center;
+      box-sizing: border-box;
+      outline: none;
+      margin: 0;
+      font-weight: 500;
+      padding: 8px 12px;
+      font-size: 14px;
+      border-radius: 4px;
+    }
+
+    button:hover {
+      border-color: #409eff;
+      color: #409eff;
+    }
+
+    .grid {
+      width: 600px;
+      padding: 10px;
+      border-radius: 8px;
+      box-shadow: 0 2px 12px 0 rgb(0 0 0 / 10%);
+      margin-bottom: 12px;
+    }
+
+    input {
+      font-size: 14px;
+      -webkit-appearance: none;
+      background-color: #fff;
+      background-image: none;
+      border-radius: 4px;
+      border: 1px solid #dcdfe6;
+      box-sizing: border-box;
+      color: #606266;
+      display: inline-block;
+      height: 32px;
+      line-height: 32px;
+      outline: none;
+      padding: 0 12px;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #409eff;
+    }
+
+    input[type=radio] {
+      display: none;
+    }
+
+    input[type=radio]+label {
+      padding: 8px 12px;
+      border-radius: 4px;
+      border: 1px solid #ddd;
+      cursor: pointer;
+      font-size: 14px;
+      margin-right: 6px;
+    }
+
+    input[type=radio]:checked+label {
+      background-color: #409eff;
+      border-color: #409eff;
+      color: #fff;
+    }
+
+    .title {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .row {
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+    }
+
+    .row:hover label {
+      color: #409eff;
+    }
+
+    .row label {
+      font-size: 14px;
+      width: 160px;
+      flex-shrink: 0;
+    }
+
+    .row input {
+      flex: 0 0 400px;
+    }
+
+    #main {
+      display: flex;
+      height: 100%;
+    }
+
+    #left {
+      flex-shrink: 0;
+    }
+
+    #log {
+      flex-grow: 1;
+      margin: 0 13px 0 20px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      box-shadow: 0 2px 12px 0 rgb(0 0 0 / 10%);
+      height: 100%;
+      overflow: auto;
+      box-sizing: border-box;
+    }
+
+    .log-row {
+      font-size: 13px;
+      margin-bottom: 2px;
+    }
+
+    #webtype,
+    #network {
+      display: flex;
+      margin-bottom: 6px;
+    }
+
+    .form-box {
+      width: 80%;
+      margin: 5px auto
+    }
+
+    .row .inputa {
+      width: 100%;
+      flex-grow: 1;
+    }
+
+    .evmnetwork {
+      width: 100px;
+      margin-top: 2px
+    }
+
+    .btn-add {
+      width: auto;
+      margin-left: 8px;
+    }
+  </style>
+
+
+</head>
+
+<body>
+  <div class="one">
+    <h1>账户信息</h1>
+    
+      <label>账户U本位余额：</label><a id="yue"></a>
+    
+    <table id="accountinfo" border="1" ></table>
+
+    <!-- 3、提供一键平仓功能
+4、提供一键反向开单功能
+5、提供一键止盈一半功能
+6、提供一键多单变空单功能
+7、提供一键空单变多单功能 -->
+    <button onclick="loadaccountinfo()">加载账户信息</button>
+    <button onclick="stopall()">一键平仓</button>
+    <button onclick="stop50percent()">平仓一半</button>
+    <button onclick="longtoshort()">多单变空单</button>
+    <button onclick="shorttolong()">空单变多单</button>
+    <button onclick="turnaround()">一键调头</button>
+  </div>
+  <div class="two">
+    <h1>操作信息窗口</h1>
+    <div id="log"></div>
+
+  </div>
+  <!-- You can also require other files to run in this process -->
+  <script src="./renderer.js"></script>
+</body>
+
+<script>
+  // You can also require other files to run in this process
+
+
+
+
+
+
+
+  (function () {
+    var old = console.log;
+    var logger = document.getElementById('log');
+    console.log = function (message) {
+      if (typeof message == 'object') {
+        logger.innerHTML += (JSON && JSON.stringify ? JSON.stringify(message) : message) + '<br />';
+      } else {
+        logger.innerHTML += message + '<br />';
+      }
+    }
+  })();
+
+  function cleanall(htmlid) {
+    var selecthtml = document.querySelector('#' + htmlid);
+    cleanchild(selecthtml)
+  }
+
+  function cleanchild(selecthtml) {
+    while (true) {
+      try {
+        selecthtml.removeChild(selecthtml.childNodes[0]);
+      }
+      catch (e) {
+        break;
+      }
+    }
+  }
+
+</script>
+
+<script>
+  const electron = require('electron');
+  const { ipcRenderer, dialog } = electron;
+
+
+  function loadaccountinfo() {
+
+    ipcRenderer.send('info:getaccountinfo', {})
+  }
+
+  function stopall()
+  {
+    ipcRenderer.send('info:stopall', {})
+  }
+
+
+  function stop50percent()
+  {
+    ipcRenderer.send('info:pingcang50', {})
+  }
+
+  function longtoshort()
+  {
+    ipcRenderer.send('info:longtoshort', {})
+  }
+
+  function shorttolong()
+  {
+    ipcRenderer.send('info:shorttolong', {})
+  }
+
+  function turnaround()
+  {
+    ipcRenderer.send('info:fanxiangkaicang', {})
+  }
+
+  function addtable(value) {
+    cleanall("accountinfo");
+    //head info
+    main = document.querySelector('#accountinfo');
+    var head = ["币种", "方向", "保证金", "杠杆", "利润", "利润率"]
+    {
+      var ul = document.createElement('tr');
+
+      for (var i = 0; i < head.length; i++) {
+        var litokenname = document.createElement('th');
+        var atokenname = document.createElement('a');
+
+        atokenname.innerHTML = head[i] + "\t\t\t\t";
+
+        litokenname.appendChild(atokenname)
+        ul.appendChild(litokenname)
+      }
+      main.appendChild(ul)
+    }
+    kaicang = value;
+    
+    //添加表格数据
+    for (var key of kaicang.keys()) {
+     
+      var rows = []
+      var tmp = kaicang.get(key);
+
+
+      var futureprice = tmp.futureprice;
+      kaicang.set(key, tmp);
+      //result += "币种：" + tmp.symbol + "\n";
+      rows.push(key);
+
+      if (Number(futureprice) > Number(tmp.startprice)) {
+        if (Number(tmp.win) >= 0) {
+          //result += "开仓方向：做多\n";
+
+          rows.push("做多");
+        }
+        else {
+          //result += "开仓方向：做空\n";
+          rows.push("做空");
+        }
+      }
+      else {
+        if (Number(tmp.win) >= 0) {
+          //result += "开仓方向：做空\n";
+          rows.push("做空");
+        }
+        else {
+          //result += "开仓方向：做多\n";
+          rows.push("做多");
+        }
+      }
+      rows.push( (Number(1) * Number(tmp.baozhengjin)).toFixed(2) + "USDT");
+      rows.push(tmp.leverage);
+      rows.push(tmp.win + "USDT");
+      rows.push((tmp.winpercent * Number(tmp.leverage)).toFixed(4) + "%");
+
+      {
+      var ul = document.createElement('tr');
+
+      for (var i = 0; i < rows.length; i++) {
+        var litokenname = document.createElement('td');
+        var atokenname = document.createElement('a');
+
+        atokenname.innerHTML = rows[i] + "\t\t\t\t";
+
+        litokenname.appendChild(atokenname)
+        ul.appendChild(litokenname)
+      }
+      main.appendChild(ul)
+    }
+      // result += "开仓价格：" + tmp.startprice + "USDT\n";
+      // result += "当前价格：" + futureprice + "USDT\n";
+      // result += "保证金：" + (Number(1) * Number(tmp.baozhengjin)).toFixed(2) + "USDT\n";
+      // result += "当前盈利：" + tmp.win + "USDT\n";
+      // result += "盈利比例：" + (tmp.winpercent * Number(tmp.leverage)).toFixed(4) + "%\n";
+      //获得开仓方向
+      //大于当前价格
+      
+    }
+
+  }
+
+  ipcRenderer.on('info:getnowmoney', (e, value) => {
+    //debugger;
+    //value 是一张map，把map修改成一张table
+    let nowmoney = (value.result);
+    let main = document.querySelector('#yue');
+    main.innerHTML = nowmoney.toFixed(2) + "USDT"
+    //console.log(value.result)
+  });
+  
+
+  ipcRenderer.on('info:getaccountinfo', (e, value) => {
+    //debugger;
+    //value 是一张map，把map修改成一张table
+    addtable(value.result);
+    //console.log(value.result)
+  });
+</script>
+
+</html>
