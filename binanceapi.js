@@ -6,6 +6,7 @@ const HttpsProxyAgent = require('https-proxy-agent')
 const fetch = require('node-fetch')
 const proxy = env.PROXYURL // HTTP/HTTPS proxy to connect to
 const agent = new HttpsProxyAgent(proxy)
+const jingdu = require('./xiadanjingdu')
 
 const requestMethod = function(url, options) {
     return fetch(url, Object.assign({}, options, { agent: agent }))
@@ -128,10 +129,32 @@ async function setLeverage(symbol, leverage = 1) {
     })
 }
 
-
+function getzuixiaoxiadanliang(symbol)
+{
+    var tmp = jingdu[symbol];
+    if(tmp)
+    {
+        tmp = tmp.toString();
+        var pos = tmp.indexOf(".");
+        if(pos==-1)
+        {
+            return 0;
+        }
+        else
+        {
+            var length = tmp.length - 1 - pos;
+            return length;
+        }
+    }
+    else
+    {
+        return 0;
+    }
+}
 
 //市价平仓
 async function FanFangxiangOrder(symbol, side = 'SELL', type = 'MARKET',quantity) {
+    quantity = Number(quantity).toFixed(getzuixiaoxiadanliang(symbol));
     let res = await bian.fapiPrivatePostOrder({ symbol, side, type, quantity })
     console.log(res);
 }

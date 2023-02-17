@@ -73,7 +73,7 @@ const eventListener = async () => {
     mainWindow.webContents.send("info:getaccountinfo", { "result":result[0] });
     if(renwuid == null)
     {
-      task1();
+      renwuid = task1();
     }
    
   })

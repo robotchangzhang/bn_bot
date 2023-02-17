@@ -20,6 +20,7 @@ async function getaccountinfo() {
     var lirun=0;
     var count=0;
     var kaicang = await bianapi.getaccount();
+    var baozhengjin = 0;
     for (var key of kaicang.keys()) {
 
         var tmp = kaicang.get(key);
@@ -53,6 +54,10 @@ async function getaccountinfo() {
                 result += "开仓方向：做多\n";
             }
         }
+        if(Number(tmp.win)<=0)
+        {
+            baozhengjin += Number(tmp.baozhengjin);
+        }
 
         result += "------------------------------\n";
         kaicangjine += Number(tmp.leverage) * Number(tmp.baozhengjin)
@@ -63,7 +68,7 @@ async function getaccountinfo() {
     result += "总共开仓金额：" + kaicangjine.toFixed(2) + "USDT\n";
     result += "总共投入保证金：" + maxbaozhengjin.toFixed(2) + "USDT\n";
     result += "浮盈：" + lirun.toFixed(2) + "USDT\n"
-    return [kaicang,maxbaozhengjin + lirun];
+    return [kaicang, maxbaozhengjin];
 }
 
 
