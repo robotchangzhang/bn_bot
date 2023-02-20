@@ -198,10 +198,10 @@
 <body>
   <div class="one">
     <h1>账户信息</h1>
-    
-      <label>账户U本位余额：</label><a id="yue"></a>
-    
-    <table id="accountinfo" border="1" ></table>
+
+    <label>账户U本位余额：</label><a id="yue"></a>
+
+    <table id="accountinfo" border="1"></table>
 
     <!-- 3、提供一键平仓功能
 4、提供一键反向开单功能
@@ -273,29 +273,24 @@
     ipcRenderer.send('info:getaccountinfo', {})
   }
 
-  function stopall()
-  {
+  function stopall() {
     ipcRenderer.send('info:stopall', {})
   }
 
 
-  function stop50percent()
-  {
+  function stop50percent() {
     ipcRenderer.send('info:pingcang50', {})
   }
 
-  function longtoshort()
-  {
+  function longtoshort() {
     ipcRenderer.send('info:longtoshort', {})
   }
 
-  function shorttolong()
-  {
+  function shorttolong() {
     ipcRenderer.send('info:shorttolong', {})
   }
 
-  function turnaround()
-  {
+  function turnaround() {
     ipcRenderer.send('info:fanxiangkaicang', {})
   }
 
@@ -319,10 +314,13 @@
       main.appendChild(ul)
     }
     kaicang = value;
-    
+
+    var fangxiang = 0;
+    var baozhengjin = 0;
+    var lirun = 0;
     //添加表格数据
     for (var key of kaicang.keys()) {
-     
+
       var rows = []
       var tmp = kaicang.get(key);
 
@@ -337,41 +335,47 @@
           //result += "开仓方向：做多\n";
 
           rows.push("做多");
+          fangxiang += 1;
         }
         else {
           //result += "开仓方向：做空\n";
           rows.push("做空");
+          fangxiang -= 1;
         }
       }
       else {
         if (Number(tmp.win) >= 0) {
           //result += "开仓方向：做空\n";
           rows.push("做空");
+          fangxiang -= 1;
         }
         else {
           //result += "开仓方向：做多\n";
           rows.push("做多");
+          fangxiang += 1;
         }
       }
-      rows.push( (Number(1) * Number(tmp.baozhengjin)).toFixed(2) + "USDT");
+      baozhengjin += Number(tmp.baozhengjin);
+      lirun += Number(tmp.win);
+      rows.push((Number(1) * Number(tmp.baozhengjin)).toFixed(2) + "USDT");
       rows.push(tmp.leverage);
       rows.push(tmp.win + "USDT");
       rows.push((tmp.winpercent * Number(tmp.leverage)).toFixed(4) + "%");
 
       {
-      var ul = document.createElement('tr');
+        var ul = document.createElement('tr');
 
-      for (var i = 0; i < rows.length; i++) {
-        var litokenname = document.createElement('td');
-        var atokenname = document.createElement('a');
+        for (var i = 0; i < rows.length; i++) {
+          var litokenname = document.createElement('td');
+          var atokenname = document.createElement('a');
 
-        atokenname.innerHTML = rows[i] + "\t\t\t\t";
+          atokenname.innerHTML = rows[i] + "\t\t\t\t";
 
-        litokenname.appendChild(atokenname)
-        ul.appendChild(litokenname)
+          litokenname.appendChild(atokenname)
+          ul.appendChild(litokenname)
+        }
+        main.appendChild(ul)
       }
-      main.appendChild(ul)
-    }
       // result += "开仓价格：" + tmp.startprice + "USDT\n";
       // result += "当前价格：" + futureprice + "USDT\n";
       // result += "保证金：" + (Number(1) * Number(tmp.baozhengjin)).toFixed(2) + "USDT\n";
@@ -379,7 +383,23 @@
       // result += "盈利比例：" + (tmp.winpercent * Number(tmp.leverage)).toFixed(4) + "%\n";
       //获得开仓方向
       //大于当前价格
-      
+
+    }
+
+    {
+      rows = ["总计",fangxiang,baozhengjin.toFixed(2) + "USDT","",lirun.toFixed(2) + "USDT", (lirun/baozhengjin*100).toFixed(2) + "%"]
+      var ul = document.createElement('tr');
+
+        for (var i = 0; i < rows.length; i++) {
+          var litokenname = document.createElement('td');
+          var atokenname = document.createElement('a');
+
+          atokenname.innerHTML = rows[i] + "\t\t\t\t";
+
+          litokenname.appendChild(atokenname)
+          ul.appendChild(litokenname)
+        }
+        main.appendChild(ul)
     }
 
   }
@@ -392,7 +412,7 @@
     main.innerHTML = nowmoney.toFixed(2) + "USDT"
     //console.log(value.result)
   });
-  
+
 
   ipcRenderer.on('info:getaccountinfo', (e, value) => {
     //debugger;
